@@ -1,6 +1,7 @@
 package com.arkivanov.mvikotlin.sample.todo.android.root
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -45,6 +46,7 @@ class RootFragment(
     private fun listOutput(output: ListOutput) {
         when (output) {
             is ListOutput.ItemSelected -> openDetails(itemId = output.id)
+            is ListOutput.ToastRequested -> Toast.makeText(requireContext(), output.message, Toast.LENGTH_LONG).show()
         }.let {}
     }
 

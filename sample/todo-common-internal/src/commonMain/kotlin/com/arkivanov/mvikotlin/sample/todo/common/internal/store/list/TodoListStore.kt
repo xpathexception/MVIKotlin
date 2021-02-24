@@ -3,10 +3,9 @@ package com.arkivanov.mvikotlin.sample.todo.common.internal.store.list
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import com.arkivanov.mvikotlin.sample.todo.common.database.TodoItem
-import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.Intent
-import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.State
+import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.*
 
-interface TodoListStore : Store<Intent, State, Nothing> {
+interface TodoListStore : Store<Intent, State, Label> {
 
     sealed class Intent : JvmSerializable {
         data class Delete(val id: String) : Intent()
@@ -20,4 +19,8 @@ interface TodoListStore : Store<Intent, State, Nothing> {
         val items: List<TodoItem> = emptyList(),
         val selectedItemId: String? = null
     ) : JvmSerializable
+
+    sealed class Label {
+        class MakeToast(val message: String) : Label()
+    }
 }
