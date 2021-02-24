@@ -3,6 +3,7 @@ package com.arkivanov.mvikotlin.sample.todo.common.internal.mapper
 import com.arkivanov.mvikotlin.sample.todo.common.controller.TodoListController.Input
 import com.arkivanov.mvikotlin.sample.todo.common.controller.TodoListController.Output
 import com.arkivanov.mvikotlin.sample.todo.common.internal.store.add.TodoAddStore
+import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore
 import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.Intent
 import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.State
 import com.arkivanov.mvikotlin.sample.todo.common.view.TodoListView.Event
@@ -42,3 +43,9 @@ val addLabelToListIntent: TodoAddStore.Label.() -> Intent? =
             is TodoAddStore.Label.Added -> Intent.AddToState(item)
         }
     }
+
+val listLabelToListOutput: TodoListStore.Label.() -> Output? = {
+    when (this) {
+        is TodoListStore.Label.MakeToast -> Output.ToastRequested(this.message)
+    }
+}

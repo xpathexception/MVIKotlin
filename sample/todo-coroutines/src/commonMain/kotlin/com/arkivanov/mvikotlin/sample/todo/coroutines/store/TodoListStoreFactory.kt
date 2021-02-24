@@ -4,8 +4,7 @@ import com.arkivanov.mvikotlin.core.store.Executor
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.SuspendExecutor
 import com.arkivanov.mvikotlin.sample.todo.common.database.TodoDatabase
-import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.Intent
-import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.State
+import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.*
 import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStoreAbstractFactory
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -19,13 +18,17 @@ internal class TodoListStoreFactory(
     storeFactory = storeFactory
 ) {
 
-    override fun createExecutor(): Executor<Intent, Unit, State, Result, Nothing> = ExecutorImpl()
+    override fun createExecutor(): Executor<Intent, Action, State, Result, Label> = ExecutorImpl()
 
-    private inner class ExecutorImpl : SuspendExecutor<Intent, Unit, State, Result, Nothing>(mainContext = mainContext) {
-        override suspend fun executeAction(action: Unit, getState: () -> State) {
+    private inner class ExecutorImpl : SuspendExecutor<Intent, Action, State, Result, Label>(mainContext = mainContext) {
+        override suspend fun executeAction(action: Action, getState: () -> State) {
             withContext(ioContext) { database.getAll() }
                 .let(Result::Loaded)
                 .also(::dispatch)
+
+            when (action) {
+                Action.NotifyCreated -> publish(Label.MakeToast("Everything is set up (Coroutines)!"))
+            }
         }
 
         override suspend fun executeIntent(intent: Intent, getState: () -> State) {

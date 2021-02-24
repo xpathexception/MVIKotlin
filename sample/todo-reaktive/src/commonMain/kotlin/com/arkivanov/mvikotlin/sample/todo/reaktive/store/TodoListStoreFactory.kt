@@ -4,8 +4,8 @@ import com.arkivanov.mvikotlin.core.store.Executor
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.reaktive.ReaktiveExecutor
 import com.arkivanov.mvikotlin.sample.todo.common.database.TodoDatabase
-import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.Intent
-import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.State
+import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore
+import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.*
 import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStoreAbstractFactory
 import com.badoo.reaktive.completable.completableFromFunction
 import com.badoo.reaktive.completable.subscribeOn
@@ -23,15 +23,19 @@ internal class TodoListStoreFactory(
     storeFactory = storeFactory
 ) {
 
-    override fun createExecutor(): Executor<Intent, Unit, State, Result, Nothing> = ExecutorImpl()
+    override fun createExecutor(): Executor<Intent, Action, State, Result, Label> = ExecutorImpl()
 
-    private inner class ExecutorImpl : ReaktiveExecutor<Intent, Unit, State, Result, Nothing>() {
-        override fun executeAction(action: Unit, getState: () -> State) {
+    private inner class ExecutorImpl : ReaktiveExecutor<Intent, Action, State, Result, Label>() {
+        override fun executeAction(action: Action, getState: () -> State) {
             singleFromFunction(database::getAll)
                 .subscribeOn(ioScheduler)
                 .map(Result::Loaded)
                 .observeOn(mainScheduler)
                 .subscribeScoped(isThreadLocal = true, onSuccess = ::dispatch)
+
+            when(action){
+                Action.NotifyCreated -> publish(Label.MakeToast("Everything is set up (Reactive)!"))
+            }
         }
 
         override fun executeIntent(intent: Intent, getState: () -> State) {

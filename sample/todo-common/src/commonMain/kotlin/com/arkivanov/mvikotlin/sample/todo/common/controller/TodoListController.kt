@@ -32,6 +32,7 @@ interface TodoListController {
     }
 
     sealed class Output {
+        data class ToastRequested(val message: String): Output()
         data class ItemSelected(val id: String) : Output()
     }
 }

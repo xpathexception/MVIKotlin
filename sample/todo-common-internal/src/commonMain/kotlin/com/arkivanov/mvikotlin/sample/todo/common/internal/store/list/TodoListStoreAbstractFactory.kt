@@ -1,15 +1,10 @@
 package com.arkivanov.mvikotlin.sample.todo.common.internal.store.list
 
-import com.arkivanov.mvikotlin.core.store.Executor
-import com.arkivanov.mvikotlin.core.store.Reducer
-import com.arkivanov.mvikotlin.core.store.SimpleBootstrapper
-import com.arkivanov.mvikotlin.core.store.Store
-import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.core.store.*
 import com.arkivanov.mvikotlin.core.utils.JvmSerializable
 import com.arkivanov.mvikotlin.sample.todo.common.database.TodoItem
 import com.arkivanov.mvikotlin.sample.todo.common.database.update
-import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.Intent
-import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.State
+import com.arkivanov.mvikotlin.sample.todo.common.internal.store.list.TodoListStore.*
 
 /**
  * Abstract factories are normally not needed. Just create a normal factory as described [here][Store].
@@ -20,10 +15,10 @@ abstract class TodoListStoreAbstractFactory(
 ) {
 
     fun create(): TodoListStore =
-        object : TodoListStore, Store<Intent, State, Nothing> by storeFactory.create(
+        object : TodoListStore, Store<Intent, State, Label> by storeFactory.create(
             name = "ListStore",
             initialState = State(),
-            bootstrapper = SimpleBootstrapper(Unit),
+            bootstrapper = SimpleBootstrapper(Action.NotifyCreated),
             executorFactory = ::createExecutor,
             reducer = ReducerImpl
         ) {
@@ -37,7 +32,7 @@ abstract class TodoListStoreAbstractFactory(
         data class Changed(val id: String, val data: TodoItem.Data) : Result()
     }
 
-    protected abstract fun createExecutor(): Executor<Intent, Unit, State, Result, Nothing>
+    protected abstract fun createExecutor(): Executor<Intent, Action, State, Result, Label>
 
     private object ReducerImpl : Reducer<State, Result> {
         override fun State.reduce(result: Result): State =
@@ -48,5 +43,9 @@ abstract class TodoListStoreAbstractFactory(
                 is Result.Added -> copy(items = items + result.item)
                 is Result.Changed -> copy(items = items.update(result.id) { result.data })
             }
+    }
+
+    protected sealed class Action {
+        object NotifyCreated : Action()
     }
 }
