@@ -46,7 +46,7 @@ class RootFragment(
     private fun listOutput(output: ListOutput) {
         when (output) {
             is ListOutput.ItemSelected -> openDetails(itemId = output.id)
-            is ListOutput.ToastRequested -> Toast.makeText(requireContext(), output.message, Toast.LENGTH_LONG)
+            is ListOutput.ToastRequested -> Toast.makeText(requireContext(), output.message, Toast.LENGTH_LONG).show()
         }.let {}
     }
 

@@ -22,20 +22,23 @@ internal class TodoListStoreFactory(
 
     private inner class ExecutorImpl : SuspendExecutor<Intent, Action, State, Result, Label>(mainContext = mainContext) {
         override suspend fun executeAction(action: Action, getState: () -> State) {
-            withContext(ioContext) { database.getAll() }
-                .let(Result::Loaded)
-                .also(::dispatch)
-
             when (action) {
                 Action.NotifyCreated -> publish(Label.MakeToast("Everything is set up (Coroutines)!"))
             }
+
+            withContext(ioContext) { database.getAll() }
+                .let(Result::Loaded)
+                .also(::dispatch)
         }
 
         override suspend fun executeIntent(intent: Intent, getState: () -> State) {
             when (intent) {
                 is Intent.Delete -> delete(intent.id)
                 is Intent.ToggleDone -> toggleDone(intent.id, getState)
-                is Intent.AddToState -> dispatch(Result.Added(intent.item))
+                is Intent.AddToState -> {
+                    publish(Label.MakeToast("Create new item: ${intent.item.data.text}"))
+                    dispatch(Result.Added(intent.item))
+                }
                 is Intent.DeleteFromState -> dispatch(Result.Deleted(intent.id))
                 is Intent.UpdateInState -> dispatch(Result.Changed(intent.id, intent.data))
             }.let {}
